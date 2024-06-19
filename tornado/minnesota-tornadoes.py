@@ -1,8 +1,12 @@
 import requests
+import os
 import pandas as pd
 import geopandas as gpd
-import os
+import tkinter as Tk
+import matplotlib.pyplot as plt
 from lxml import etree
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
 
 def get_tornado_data(year:int) -> dict:
     tornado_data = {}
@@ -38,5 +42,21 @@ def generate_map(year:int):
     gdf.loc[gdf[year].isnull(),year] = 0 # set all NaN values to 0 for plotting
     gdf.plot(column=year,cmap='OrRd',edgecolor='black',legend=True)
 
+def interactive_map():
+    # master tkinter window
+    root = Tk.Tk()
+    root.geometry( "700x500" )
+    # dropdown menu with years
+    options = ['2019','2020','2021']
+    clicked = Tk.IntVar()
+    clicked.set('2019')
+    dropdown = Tk.OptionMenu(root, clicked, *options)
+    dropdown.pack()
+    # map area
+    fig, ax = plt.subplots()
+    canvas = FigureCanvasTkAgg(fig, master = root)
+    canvas.get_tk_widget().pack()
+    
+    root.mainloop()
 
 generate_map(2020)
