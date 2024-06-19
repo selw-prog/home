@@ -8,7 +8,7 @@ from lxml import etree
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 
-def get_tornado_data(year:int) -> dict:
+def get_tornado_data(year:str) -> dict:
     tornado_data = {}
     url = 'https://www.weather.gov/source/mpx/TornadoStats/minnesotaTornadoes{y}.xml'.format(y = year) # seems like they don't have data avail past 2010
     raw = requests.get(url)
@@ -34,29 +34,38 @@ def get_tornado_data(year:int) -> dict:
     tornado_data[year] = counties
     return tornado_data
 
-def generate_map(year:int):
+def generate_map(year:str):
     gdf = gpd.read_file(os.getcwd()+'/cb_2023_us_county_500k') # get geodataframe, source https://www2.census.gov/geo/tiger/GENZ2023/gdb/
     gdf = gdf[gdf.STATE_NAME == 'Minnesota']
     tornado_df = pd.DataFrame.from_dict(get_tornado_data(year))
     gdf = gdf.merge(tornado_df, how='left', left_on='NAME', right_index = True)
     gdf.loc[gdf[year].isnull(),year] = 0 # set all NaN values to 0 for plotting
-    gdf.plot(column=year,cmap='OrRd',edgecolor='black',legend=True)
+    #gdf.plot(column=year,cmap='OrRd',edgecolor='black',legend=True)
+    return gdf
 
-def interactive_map():
-    # master tkinter window
-    root = Tk.Tk()
-    root.geometry( "700x500" )
-    # dropdown menu with years
-    options = ['2019','2020','2021']
-    clicked = Tk.IntVar()
-    clicked.set('2019')
-    dropdown = Tk.OptionMenu(root, clicked, *options)
-    dropdown.pack()
-    # map area
-    fig, ax = plt.subplots()
-    canvas = FigureCanvasTkAgg(fig, master = root)
-    canvas.get_tk_widget().pack()
-    
-    root.mainloop()
+def update():
+    new_map = generate_map(clicked.get())
+    new_map.plot(ax = ax, column = clicked.get(),cmap = 'OrRd',edgecolor = 'black',legend = True)
+    canvas.draw()
 
-generate_map(2020)
+#def interactive_map():
+
+# master tkinter window
+root = Tk.Tk()
+root.geometry( "700x500" )
+# dropdown menu with years
+options = ['2019','2020','2021']
+clicked = Tk.StringVar(master = root)
+clicked.set(options[0])
+clicked.trace_add('write', update)
+dropdown = Tk.OptionMenu(root, clicked, *options)
+dropdown.pack()
+# map area
+fig, ax = plt.subplots()
+map = generate_map(clicked.get())
+map.plot(ax = ax, column = clicked.get(),cmap = 'OrRd',edgecolor = 'black',legend = True)
+plt.show()
+canvas = FigureCanvasTkAgg(fig, master = root)
+canvas.get_tk_widget().pack()
+canvas.draw()
+root.mainloop()
