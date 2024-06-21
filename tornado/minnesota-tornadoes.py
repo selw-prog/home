@@ -43,12 +43,10 @@ def generate_map(year:str):
     #gdf.plot(column=year,cmap='OrRd',edgecolor='black',legend=True)
     return gdf
 
-def update():
+def update(*args):
     new_map = generate_map(clicked.get())
     new_map.plot(ax = ax, column = clicked.get(),cmap = 'OrRd',edgecolor = 'black',legend = True)
     canvas.draw()
-
-#def interactive_map():
 
 # master tkinter window
 root = Tk.Tk()
@@ -64,7 +62,6 @@ dropdown.pack()
 fig, ax = plt.subplots()
 map = generate_map(clicked.get())
 map.plot(ax = ax, column = clicked.get(),cmap = 'OrRd',edgecolor = 'black',legend = True)
-plt.show()
 canvas = FigureCanvasTkAgg(fig, master = root)
 canvas.get_tk_widget().pack()
 canvas.draw()
