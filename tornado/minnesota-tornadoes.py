@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 from lxml import etree
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
+root = Tk.Tk()
+canvas = None
 
 def get_tornado_data(year:str) -> dict:
     tornado_data = {}
@@ -40,16 +42,22 @@ def generate_map(year:str):
     tornado_df = pd.DataFrame.from_dict(get_tornado_data(year))
     gdf = gdf.merge(tornado_df, how='left', left_on='NAME', right_index = True)
     gdf.loc[gdf[year].isnull(),year] = 0 # set all NaN values to 0 for plotting
-    #gdf.plot(column=year,cmap='OrRd',edgecolor='black',legend=True)
     return gdf
 
 def update(*args):
-    new_map = generate_map(clicked.get())
-    new_map.plot(ax = ax, column = clicked.get(),cmap = 'OrRd',edgecolor = 'black',legend = True)
+    global canvas
+    if canvas: 
+        canvas.get_tk_widget().pack_forget()
+    fig, ax = plt.subplots()
+    plt.axis('off')
+    canvas = FigureCanvasTkAgg(fig, master = root)
+    canvas.get_tk_widget().pack()
+    map = generate_map(clicked.get())
+    map.plot(ax = ax,column = clicked.get(),cmap = 'OrRd',edgecolor = 'black',legend = True)
     canvas.draw()
 
+
 # master tkinter window
-root = Tk.Tk()
 root.geometry( "700x500" )
 # dropdown menu with years
 options = ['2019','2020','2021']
@@ -58,11 +66,5 @@ clicked.set(options[0])
 clicked.trace_add('write', update)
 dropdown = Tk.OptionMenu(root, clicked, *options)
 dropdown.pack()
-# map area
-fig, ax = plt.subplots()
-map = generate_map(clicked.get())
-map.plot(ax = ax, column = clicked.get(),cmap = 'OrRd',edgecolor = 'black',legend = True)
-canvas = FigureCanvasTkAgg(fig, master = root)
-canvas.get_tk_widget().pack()
-canvas.draw()
+update()
 root.mainloop()
