@@ -50,6 +50,7 @@ def update(*args):
         canvas.get_tk_widget().pack_forget()
     fig, ax = plt.subplots()
     plt.axis('off')
+    plt.title('Tornado Statistics by County')
     canvas = FigureCanvasTkAgg(fig, master = root)
     canvas.get_tk_widget().pack()
     map = generate_map(clicked.get())
@@ -60,6 +61,8 @@ def update(*args):
 # master tkinter window
 root.geometry( "700x500" )
 # dropdown menu with years
+label = Tk.Label(master = root, text = 'Year')
+label.pack()
 options = ['2010','2011','2012','2013','2014','2015','2016','2017','2018','2019','2020','2021']
 clicked = Tk.StringVar(master = root)
 clicked.set(options[0])
