@@ -52,22 +52,20 @@ def update(*args):
     plt.axis('off')
     plt.title('Tornado Statistics by County')
     canvas = FigureCanvasTkAgg(fig, master = root)
-    canvas.get_tk_widget().pack()
-    map = generate_map(clicked.get())
-    map.plot(ax = ax,column = clicked.get(),cmap = 'OrRd',edgecolor = 'black',legend = True)
-    canvas.draw()
+    canvas.get_tk_widget().grid(row = 0, column = 1)
+    for select in option_list.curselection():
+        map = generate_map(option_list.get(select))
+        map.plot(ax = ax,column = option_list.get(select),cmap = 'OrRd',edgecolor = 'black',legend = True)
 
 
 # master tkinter window
 root.geometry( "700x500" )
 # dropdown menu with years
-label = Tk.Label(master = root, text = 'Year')
-label.pack()
+select_frame = Tk.LabelFrame(master = root, text = 'Year Selection').grid(row = 0, column = 0)
 options = ['2010','2011','2012','2013','2014','2015','2016','2017','2018','2019','2020','2021']
-clicked = Tk.StringVar(master = root)
-clicked.set(options[0])
-clicked.trace_add('write', update)
-dropdown = Tk.OptionMenu(root, clicked, *options)
-dropdown.pack()
-update()
+option_list = Tk.Listbox(master = root, selectmode = 'single')
+option_list.grid(row = 0, column = 0)
+for item in range(len(options)):
+    option_list.insert(item, options[item])
+update_button = Tk.Button(master = root, text = 'Update Map', command = update).grid(row = 1, column = 0)
 root.mainloop()
