@@ -70,10 +70,12 @@ root = Tk.Tk()
 canvas = None 
 root.geometry( "700x500" )
 # dropdown menu with years
-select_frame = Tk.LabelFrame(master = root, text = 'Year Selection').grid(row = 0, column = 0)
+select_frame = Tk.Frame(master = root).grid(row = 0, column = 0)
 option_list = Tk.Listbox(master = root, selectmode = 'multiple')
-option_list.grid(row = 0, column = 0)
+option_list.grid(row = 0, column = 0, pady = 2)
 for item in range(len(YEARS)):
     option_list.insert(item, YEARS[item])
 update_button = Tk.Button(master = root, text = 'Update Map', command = update).grid(row = 1, column = 0)
+option_list.select_set(0)
+update()
 root.mainloop()
