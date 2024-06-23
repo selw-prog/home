@@ -75,7 +75,7 @@ menu_frame.pack(side = 'left')
 year_select_label = Tk.Label(master = menu_frame, text = 'Year Selection').grid(row = 0, column = 0, pady = 2)
 option_list_frame = Tk.Frame(master = menu_frame)
 option_list_frame.grid(row = 1, column = 0, pady = 10)
-option_list = Tk.Listbox(master = option_list_frame, selectmode = 'multiple')
+option_list = Tk.Listbox(master = option_list_frame, selectmode = 'extended') # extended mode doesn't work properly in Jupyter interactive window
 option_list.grid(row = 0, column = 0)
 for item in range(len(YEARS)):
     option_list.insert(item, YEARS[item])
