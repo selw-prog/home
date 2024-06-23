@@ -56,7 +56,7 @@ def update(*args):
     plt.axis('off')
     plt.title('Tornado Statistics by County')
     canvas = FigureCanvasTkAgg(fig, master = root)
-    canvas.get_tk_widget().grid(row = 0, column = 1)
+    canvas.get_tk_widget().pack(side = 'right')
     for select in option_list.curselection():
         gdf['YEAR_SUM'] = gdf['YEAR_SUM'] + gdf[option_list.get(select)]
     gdf['YEAR_SUM'] = gdf['YEAR_SUM'].astype(int)
@@ -68,14 +68,23 @@ gdf = get_tornado_data()
 # master tkinter window
 root = Tk.Tk()
 canvas = None 
-root.geometry( "700x500" )
-# dropdown menu with years
-select_frame = Tk.Frame(master = root).grid(row = 0, column = 0)
-option_list = Tk.Listbox(master = root, selectmode = 'multiple')
-option_list.grid(row = 0, column = 0, pady = 2)
+root.geometry('700x500')
+# menu objects 
+menu_frame = Tk.Frame(master = root)
+menu_frame.pack(side = 'left')
+year_select_label = Tk.Label(master = menu_frame, text = 'Year Selection').grid(row = 0, column = 0, pady = 2)
+option_list_frame = Tk.Frame(master = menu_frame)
+option_list_frame.grid(row = 1, column = 0, pady = 10)
+option_list = Tk.Listbox(master = option_list_frame, selectmode = 'multiple')
+option_list.grid(row = 0, column = 0)
 for item in range(len(YEARS)):
     option_list.insert(item, YEARS[item])
-update_button = Tk.Button(master = root, text = 'Update Map', command = update).grid(row = 1, column = 0)
+option_list_scrollbar = Tk.Scrollbar(master = option_list_frame, orient = 'vertical')
+option_list_scrollbar.grid(row = 0, column = 1, sticky = 'ns')
+option_list_scrollbar.config(command = option_list.yview)
+option_list.config(yscrollcommand = option_list_scrollbar.set)
+update_button = Tk.Button(master = menu_frame, text = 'Update Map', command = update).grid(row = 2, column = 0, pady = 2)
+# default view
 option_list.select_set(0)
 update()
 root.mainloop()
