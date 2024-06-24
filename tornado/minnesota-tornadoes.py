@@ -56,19 +56,33 @@ def update(*args):
     plt.axis('off')
     plt.title('Tornado Statistics by County')
     canvas = FigureCanvasTkAgg(fig, master = root)
-    canvas.get_tk_widget().pack(side = 'right')
+    canvas.get_tk_widget().pack(side = 'top')
     for select in option_list.curselection():
         gdf['YEAR_SUM'] = gdf['YEAR_SUM'] + gdf[option_list.get(select)]
     gdf['YEAR_SUM'] = gdf['YEAR_SUM'].astype(int)
     gdf.plot(ax = ax,column = 'YEAR_SUM',cmap = 'OrRd',edgecolor = 'black',legend = True)
-
+    # top 5 table
+    for widget in top_5.winfo_children():
+        widget.destroy()
+    top_5_data_table = Tk.Frame(master = top_5)
+    top_5_data_table.pack(side = 'top')
+    top_5_counties = gdf.sort_values('YEAR_SUM', ascending = False).head(5)[['NAME','YEAR_SUM']]
+    county_header_label = Tk.Label(master = top_5_data_table, text = 'County Name', font = ('Helvectica', 9, 'bold')).grid(row = 0, column = 0)
+    tornado_count_header_label = Tk.Label(master = top_5_data_table, text = 'Tornado Count', font = ('Helvectica', 9, 'bold')).grid(row = 0, column = 1)
+    row_count = 1
+    for index, row in top_5_counties.iterrows():
+        county_name_label = Tk.Label(master = top_5_data_table, text = row.iloc[0], font = ('Helvectica', 9)).grid(row = row_count, column = 0) # county name
+        tornado_count_label = Tk.Label(master = top_5_data_table, text = row.iloc[1], font = ('Helvectica', 9)).grid(row = row_count, column = 1) # tornado count
+        row_count = row_count + 1
 
 # get all data
 gdf = get_tornado_data()
 # master tkinter window
 root = Tk.Tk()
 canvas = None 
-root.geometry('700x500')
+root.geometry('700x600')
+top_5 = Tk.Frame(master = root)
+top_5.pack(side = 'bottom')
 # menu objects 
 menu_frame = Tk.Frame(master = root)
 menu_frame.pack(side = 'left')
