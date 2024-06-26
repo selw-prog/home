@@ -8,7 +8,7 @@ from lxml import etree
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 # CONSTANTS
-YEARS = ['2010','2011','2012','2013','2014','2015','2016','2017','2018','2019','2020','2021']
+YEARS = ['2010','2011','2012','2013','2014','2015','2016','2017','2018','2019','2020','2021'] # weather.gov site does not have data past 2010 available
 TORNADO_DATA = {}
 
 def get_tornado_data() -> gpd.GeoDataFrame:
@@ -16,14 +16,14 @@ def get_tornado_data() -> gpd.GeoDataFrame:
     Processes .xml files from weather.gov for all years specified in YEARS. 
     '''
     for year in YEARS:
-        url = 'https://www.weather.gov/source/mpx/TornadoStats/minnesotaTornadoes{y}.xml'.format(y = year) # seems like they don't have data avail past 2010
+        url = 'https://www.weather.gov/source/mpx/TornadoStats/minnesotaTornadoes{y}.xml'.format(y = year)
         raw = requests.get(url)
         root = etree.fromstring(raw.content)
         data = []
         for child in root.iterchildren():
             data.append(dict(child.attrib))
         counties = {}
-        for event in data:
+        for event in data: # calculating statistics for each county 
             if ',' in event['counties']:
                 for c in event['counties'].split(','):
                     county = c.strip()
@@ -41,15 +41,15 @@ def get_tornado_data() -> gpd.GeoDataFrame:
     gdf = gpd.read_file(os.getcwd()+'/cb_2023_us_county_500k') # get geodataframe, source https://www2.census.gov/geo/tiger/GENZ2023/gdb/
     gdf = gdf[gdf.STATE_NAME == 'Minnesota']
     tornado_df = pd.DataFrame.from_dict(TORNADO_DATA)
-    gdf = gdf.merge(tornado_df, how='left', left_on='NAME', right_index = True)
-    for year in YEARS:
-        gdf.loc[gdf[year].isnull(),year] = 0 # set all NaN values to 0 for plotting
+    gdf = gdf.merge(tornado_df, how='left', left_on='NAME', right_index = True) # merging gdf with tornado statistics
+    for year in YEARS: # set all NaN values to 0 for plotting
+        gdf.loc[gdf[year].isnull(),year] = 0 
     return gdf
 
 def update(*args):
-    plt.close()
+    plt.close() # close previously open plot
     gdf['YEAR_SUM'] = 0
-    global canvas # should this really be here?
+    global canvas
     if canvas: 
         canvas.get_tk_widget().pack_forget()
     fig, ax = plt.subplots()
@@ -61,7 +61,7 @@ def update(*args):
         gdf['YEAR_SUM'] = gdf['YEAR_SUM'] + gdf[option_list.get(select)]
     gdf['YEAR_SUM'] = gdf['YEAR_SUM'].astype(int)
     gdf.plot(ax = ax,column = 'YEAR_SUM',cmap = 'OrRd',edgecolor = 'black',legend = True)
-    # top 5 table
+    # refreshing top 5 table
     for widget in top_5.winfo_children():
         widget.destroy()
     top_5_data_table = Tk.Frame(master = top_5)
