@@ -31,5 +31,5 @@ Sean Elwood
 
 ## Images
 
-![Single Select](images/Single-Select.png?raw=true "Single Select")
-![Multiple Select](images/Multiple-Select.png?raw=true "Multiple Select")
+![Single Select](/images/Single-Select.png?raw=true "Single Select")
+![Multiple Select](/images/Multiple-Select.png?raw=true "Multiple Select")
