@@ -79,6 +79,7 @@ def update(*args):
 gdf = get_tornado_data()
 # master tkinter window
 root = Tk.Tk()
+root.title('Tornado Statistics')
 canvas = None 
 root.geometry('700x600')
 top_5 = Tk.Frame(master = root)
