@@ -4,7 +4,7 @@ import csv
 import matplotlib.pyplot as plt
 
 # Apr  5 20:53:06 dnsmasq[4317]: query[A] checkappexec.microsoft.com from 192.168.4.40
-# Probably ought to build out this class a little more, printing this is a pain in the ass
+# Probably ought to build out this class a little more
 # queries(requestor_ip, query, record_type, date, time)
 class Query:
     requestor = ''
