@@ -7,8 +7,6 @@ Minnesota Tornado Statistics by County
 Using data obtained from weather.gov, calculate yearly tornado statistics by county and plot onto a map.
 A simple UI allows you to select the year(s) of interest and updates the map accordingly. The top 5 counties are also displayed in table format. 
 
-## Getting Started
-
 ### Dependencies
 
 I used Miniconda to create a virtual environment and install GeoPandas. This was suggested in GeoPandas [documentation](https://geopandas.org/en/stable/getting_started/install.html).
@@ -30,3 +28,8 @@ Sean Elwood
 ## Acknowledgments
 
 * [DomPizzie](https://gist.github.com/DomPizzie/7a5ff55ffa9081f2de27c315f5018afc)
+
+## Images
+
+![Single Select](images/Single-Select.png?raw=true "Single Select")
+![Multiple Select](images/Multiple-Select.png?raw=true "Multiple Select")
