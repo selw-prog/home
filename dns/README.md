@@ -7,7 +7,7 @@ DNS Query Statistics
 Input is a dnsmasq log file containing all DNS queries. This is processed with regular expressions. 
 A .csv is generated. Plotting this data in a graph does not seem feasible as of yet. 
 
-Work in prgoress.
+Work in progress.
 
 ## Getting Started
 
