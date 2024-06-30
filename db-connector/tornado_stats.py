@@ -9,8 +9,20 @@ from dotenv import dotenv_values
 sqlserver_config = dotenv_values('.env')
 cnx = mysql.connector.connect(user = sqlserver_config['USERNAME'], password = sqlserver_config['PASSWORD'],
                               host = sqlserver_config['IPADDRESS'], database = sqlserver_config['DATABASE'])
+cursor = cnx.cursor()
 
-add_county = ("INSERT INTO county "
+add_tornado_stats = ("INSERT INTO tornado "
               "(year, state, county, numTornados) "
-              "VALUES ({y}, {s}, {c}, {nT})".format())
+              "VALUES (%(year)s,%(state)s, %(county)s, %(numTornados)s)")
 
+test_data = {
+    'year' : '1',
+    'state' : 'Minnesota',
+    'county' : 'Rice',
+    'numTornados' : 10
+}
+
+cursor.execute(add_tornado_stats, test_data)
+cnx.commit()
+cursor.close()
+cnx.close()
