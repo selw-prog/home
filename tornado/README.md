@@ -36,3 +36,9 @@ Sean Elwood
 
 ### Multiple Year Selection
 ![Multiple Select](https://github.com/selw-prog/home/blob/main/tornado/images/Multiple-Select.PNG "Multiple Select")
+
+### Database
+Database is a work in progress - see [db-scripts](https://github.com/selw-prog/home/blob/main/tornado/db-scripts) for associated files.
+Once the database contains all the necessary data I'll work on updating the application to get data from there. 
+
+![Database Diagram](https://github.com/selw-prog/home/blob/main/tornado/images/Database-Diagram.PNG "Database Diagram")
