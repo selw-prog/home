@@ -1,5 +1,7 @@
 import mysql.connector
 from dotenv import dotenv_values
+import pandas as pd
+import geopandas as gpd
 
 # schema 
 # county(countyID INT, county VARCHAR, state VARCHAR, geometry TEXT) - PK countyID
@@ -15,13 +17,16 @@ add_mn_county = ("INSERT INTO county "
               "(countyID, county, state, geometry) "
               "VALUES (default,%(county)s, %(state)s, %(geometry)s)")
 
-test_data = {
-    'county' : 'Rice',
-    'state' : 'Minnesota',
-    'geometry' : 'test data'
-}
-
-cursor.execute(add_mn_county, test_data)
-cnx.commit()
+gdf = gpd.read_file('../cb_2023_us_county_500k') # get geodataframe, source https://www2.census.gov/geo/tiger/GENZ2023/gdb/
+gdf = gdf[gdf.STATE_NAME == 'Minnesota']
+for_county_table = gdf[['NAME','STATE_NAME','geometry']]
+for index,row in for_county_table.iterrows():
+    db_insert_data = {
+        'county' : row['NAME'],
+        'state' : row['STATE_NAME'],
+        'geometry' : row['geometry'] # TypeError: Python 'polygon' cannot be converted to a MySQL type
+    }
+    cursor.execute(add_mn_county, db_insert_data)
+    cnx.commit()
 cursor.close()
 cnx.close()
