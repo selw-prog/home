@@ -1,7 +1,9 @@
 import mysql.connector
-from dotenv import dotenv_values
-import pandas as pd
 import geopandas as gpd
+import pandas as pd
+import matplotlib.pyplot as plt
+from dotenv import dotenv_values
+from shapely import wkt
 
 # schema 
 # county(countyID INT, county VARCHAR, state VARCHAR, geometry TEXT) - PK countyID
@@ -31,3 +33,20 @@ def add_minnesota_counties_to_db():
         cnx.commit()
     cursor.close()
     cnx.close()
+
+def test_query() -> pd.DataFrame:
+    query = ("SELECT * FROM county")
+    cursor.execute(query)
+    df = pd.DataFrame(cursor, columns = cursor.column_names)
+    return df
+
+def test_wkt_convert() -> pd.DataFrame:
+    query = ("SELECT * FROM county")
+    cursor.execute(query)
+    df = pd.DataFrame(cursor, columns = cursor.column_names)
+    df['geometry'] = gpd.GeoSeries.from_wkt(df['geometry'])
+    gdf = gpd.GeoDataFrame(df, geometry = 'geometry')
+    gdf.plot()
+    
+#data = test_query()
+test_wkt_convert()
