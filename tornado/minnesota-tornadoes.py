@@ -4,51 +4,30 @@ import pandas as pd
 import geopandas as gpd
 import tkinter as Tk
 import matplotlib.pyplot as plt
+import mysql.connector
 from lxml import etree
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from dotenv import dotenv_values
 
 # CONSTANTS
 YEARS = ['2010','2011','2012','2013','2014','2015','2016','2017','2018','2019','2020','2021'] # weather.gov site does not have data past 2010 available
 TORNADO_DATA = {}
 
-def get_tornado_data() -> gpd.GeoDataFrame:
-    '''
-    Processes .xml files from weather.gov for all years specified in YEARS. 
-    '''
-    for year in YEARS:
-        url = 'https://www.weather.gov/source/mpx/TornadoStats/minnesotaTornadoes{y}.xml'.format(y = year)
-        raw = requests.get(url)
-        root = etree.fromstring(raw.content)
-        data = []
-        for child in root.iterchildren():
-            data.append(dict(child.attrib))
-        counties = {}
-        for event in data: # calculating statistics for each county 
-            if ',' in event['counties']:
-                for c in event['counties'].split(','):
-                    county = c.strip()
-                    if county in counties.keys():
-                        counties[county] += 1
-                    else:
-                        counties[county] = 1
-            else:
-                county = event['counties'].strip()
-            if county in counties.keys():
-                counties[county] += 1
-            else:
-                counties[county] = 1
-        TORNADO_DATA[year] = counties
-    gdf = gpd.read_file(os.getcwd()+'/cb_2023_us_county_500k') # get geodataframe, source https://www2.census.gov/geo/tiger/GENZ2023/gdb/
-    gdf = gdf[gdf.STATE_NAME == 'Minnesota']
-    tornado_df = pd.DataFrame.from_dict(TORNADO_DATA)
-    gdf = gdf.merge(tornado_df, how='left', left_on='NAME', right_index = True) # merging gdf with tornado statistics
-    for year in YEARS: # set all NaN values to 0 for plotting
-        gdf.loc[gdf[year].isnull(),year] = 0 
-    return gdf
+sqlserver_config = dotenv_values('.env')
+cnx = mysql.connector.connect(user = sqlserver_config['USERNAME'], password = sqlserver_config['PASSWORD'],
+                              host = sqlserver_config['IPADDRESS'], database = sqlserver_config['DATABASE'])
+cursor = cnx.cursor()
+query = ("SELECT county.countyID,county.county,county.state,county.geometry,tornado.year,tornado.numTornados FROM county INNER JOIN tornado ON county.countyID=tornado.countyID")
+cursor.execute(query)
+TORNADO_STATS_DF = pd.DataFrame(cursor, columns = cursor.column_names)
+query = ("SELECT * FROM county")
+cursor.execute(query)
+df = pd.DataFrame(cursor, columns = cursor.column_names)
+gs = gpd.GeoSeries.from_wkt(df['geometry'])
+GDF = gpd.GeoDataFrame(df, columns = cursor.column_names, geometry = gs)
 
 def update(*args):
     plt.close() # close previously open plot
-    gdf['YEAR_SUM'] = 0
     global canvas
     if canvas: 
         canvas.get_tk_widget().pack_forget()
@@ -57,16 +36,20 @@ def update(*args):
     plt.title('Tornado Statistics by County')
     canvas = FigureCanvasTkAgg(fig, master = root)
     canvas.get_tk_widget().pack(side = 'top')
+    plot_gdf = GDF
     for select in option_list.curselection():
-        gdf['YEAR_SUM'] = gdf['YEAR_SUM'] + gdf[option_list.get(select)]
-    gdf['YEAR_SUM'] = gdf['YEAR_SUM'].astype(int)
-    gdf.plot(ax = ax,column = 'YEAR_SUM',cmap = 'OrRd',edgecolor = 'black',legend = True)
+        print(TORNADO_STATS_DF[TORNADO_STATS_DF.year == 2010])
+        filtered_stats = TORNADO_STATS_DF[TORNADO_STATS_DF.year == int(option_list.get(select))][['countyID','numTornados']]
+        filtered_stats = filtered_stats.rename(columns = {'numTornados' : 'numTornados_{year}'.format(year = option_list.get(select))})
+        plot_gdf = plot_gdf.merge(filtered_stats, on = 'countyID', how = 'left')
+    plot_gdf['YEAR_SUM'] = plot_gdf[plot_gdf.columns[plot_gdf.columns.str.startswith('numTornados')]].sum(axis = 1)
+    plot_gdf.plot(ax = ax,column = 'YEAR_SUM',cmap = 'OrRd',edgecolor = 'black',legend = True)
     # refreshing top 5 table
     for widget in top_5.winfo_children():
         widget.destroy()
     top_5_data_table = Tk.Frame(master = top_5)
     top_5_data_table.pack(side = 'top')
-    top_5_counties = gdf.sort_values('YEAR_SUM', ascending = False).head(5)[['NAME','YEAR_SUM']]
+    top_5_counties = plot_gdf.sort_values('YEAR_SUM', ascending = False).head(5)[['county','YEAR_SUM']]
     county_header_label = Tk.Label(master = top_5_data_table, text = 'County Name', font = ('Helvectica', 9, 'bold')).grid(row = 0, column = 0)
     tornado_count_header_label = Tk.Label(master = top_5_data_table, text = 'Tornado Count', font = ('Helvectica', 9, 'bold')).grid(row = 0, column = 1)
     row_count = 1
@@ -75,8 +58,6 @@ def update(*args):
         tornado_count_label = Tk.Label(master = top_5_data_table, text = row.iloc[1], font = ('Helvectica', 9)).grid(row = row_count, column = 1) # tornado count
         row_count = row_count + 1
 
-# get all data
-gdf = get_tornado_data()
 # master tkinter window
 root = Tk.Tk()
 root.title('Tornado Statistics')
