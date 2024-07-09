@@ -38,7 +38,6 @@ def update(*args):
     canvas.get_tk_widget().pack(side = 'top')
     plot_gdf = GDF
     for select in option_list.curselection():
-        print(TORNADO_STATS_DF[TORNADO_STATS_DF.year == 2010])
         filtered_stats = TORNADO_STATS_DF[TORNADO_STATS_DF.year == int(option_list.get(select))][['countyID','numTornados']]
         filtered_stats = filtered_stats.rename(columns = {'numTornados' : 'numTornados_{year}'.format(year = option_list.get(select))})
         plot_gdf = plot_gdf.merge(filtered_stats, on = 'countyID', how = 'left')
@@ -62,7 +61,7 @@ def update(*args):
 root = Tk.Tk()
 root.title('Tornado Statistics')
 canvas = None 
-root.geometry('700x600')
+root.geometry('800x700')
 top_5 = Tk.Frame(master = root)
 top_5.pack(side = 'bottom')
 # menu objects 
