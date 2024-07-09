@@ -97,11 +97,14 @@ def test_wkt_convert() -> pd.DataFrame:
     gdf.plot()
     
 def test_join(): 
-    query = ("SELECT * FROM county INNER JOIN tornado ON county.countyID=tornado.countyID") # returns 87 * 12 = 1044 rows, will not scale well
+    query = ("SELECT county.countyId,county.county,county.state,county.geometry,tornado.year,tornado.numTornados FROM county INNER JOIN tornado ON county.countyID=tornado.countyID") # returns 87 * 12 = 1044 rows, will not scale well
     cursor.execute(query)
-    for row in cursor:
-        print(row)
+    df = pd.DataFrame(cursor, columns = cursor.column_names)
+    df['geometry'] = gpd.GeoSeries.from_wkt(df['geometry'])
+    gdf = gpd.GeoDataFrame(df, geometry = 'geometry')
+    return gdf
 
 #data = test_query()
 #test_wkt_convert()
 #df = add_tornado_stats_to_db()
+join = test_join()
