@@ -17,12 +17,12 @@ cnx = mysql.connector.connect(user = sqlserver_config['USERNAME'], password = sq
                               host = sqlserver_config['IPADDRESS'], database = sqlserver_config['DATABASE'])
 cursor = cnx.cursor()
 
-def add_minnesota_counties_to_db():
-    add_mn_county = ("INSERT INTO county "
+def add_counties_to_db(state:str):
+    add_county = ("INSERT INTO county "
               "(countyID, county, state, geometry) "
               "VALUES (default,%(county)s, %(state)s, %(geometry)s)")
     gdf = gpd.read_file('../cb_2023_us_county_500k') # get geodataframe, source https://www2.census.gov/geo/tiger/GENZ2023/gdb/
-    gdf = gdf[gdf.STATE_NAME == 'Minnesota']
+    gdf = gdf[gdf.STATE_NAME == '{s}'.format(s = state)]
     gdf = gdf.to_wkt() # convert all geometry columns to well known text for storage in db
     for_county_table = gdf[['NAME','STATE_NAME','geometry']]
     for index,row in for_county_table.iterrows():
@@ -31,12 +31,12 @@ def add_minnesota_counties_to_db():
             'state' : row['STATE_NAME'],
             'geometry' : row['geometry']
         }
-        cursor.execute(add_mn_county, db_insert_data)
+        cursor.execute(add_county, db_insert_data)
         cnx.commit()
     cursor.close()
     cnx.close()
 
-def add_tornado_stats_to_db():
+def add_mn_tornado_stats_to_db():
     add_tornado_stats = ("INSERT INTO tornado "
                   "(countyID, year, numTornados) "
                   "VALUES (%(countyID)s, %(year)s, %(numTornados)s)")
@@ -82,14 +82,14 @@ def add_tornado_stats_to_db():
             cnx.commit()
     return df
 
-def test_query() -> pd.DataFrame:
+def get_all_county_info() -> pd.DataFrame:
     query = ("SELECT * FROM county")
     cursor.execute(query)
     df = pd.DataFrame(cursor, columns = cursor.column_names)
     return df
 
-def test_wkt_convert() -> pd.DataFrame:
-    query = ("SELECT * FROM county")
+def test_wkt_convert(state:str) -> pd.DataFrame:
+    query = ("SELECT * FROM county WHERE state = '{s}'".format(s = state))
     cursor.execute(query)
     df = pd.DataFrame(cursor, columns = cursor.column_names)
     df['geometry'] = gpd.GeoSeries.from_wkt(df['geometry'])
@@ -104,7 +104,8 @@ def test_join():
     gdf = gpd.GeoDataFrame(df, geometry = 'geometry')
     return gdf
 
-#data = test_query()
-#test_wkt_convert()
-#df = add_tornado_stats_to_db()
-join = test_join()
+
+test_wkt_convert('Wisconsin')
+test_wkt_convert('Iowa')
+test_wkt_convert('Minnesota')
+all_data = get_all_county_info()
