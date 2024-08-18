@@ -8,6 +8,27 @@ from PIL import Image
 
 pytesseract.pytesseract.tesseract_cmd = r'C:\\Program Files\\Tesseract-OCR\\tesseract.exe'
 
+def add_wi_tornado_stats_to_db(tornado_df):
+    add_tornado_stats = ("INSERT INTO tornado "
+                  "(countyID, year, numTornados) "
+                  "VALUES (%(countyID)s, %(year)s, %(numTornados)s)")
+    query = ("SELECT * FROM county WHERE state = 'Wisconsin'")
+    cursor.execute(query)
+    df = pd.DataFrame(cursor, columns = cursor.column_names)
+    df = df.merge(tornado_df, how='left', left_on='county', right_index = True) # merging gdf with tornado statistics
+    df = df.fillna(0)
+    for index,row in df.iterrows():
+        db_insert_data = {
+            'countyID' : row['countyID'],
+            'year' : 2024,
+            'numTornados' : row['numTornados']
+        }
+        print(db_insert_data)
+        cursor.execute(add_tornado_stats, db_insert_data)
+        cnx.commit()
+    return df
+
+
 # detect tornado data in table
 img_cv = cv2.imread('2024WiTorEvents.jpg')
 img_rgb = cv2.cvtColor(img_cv, cv2.COLOR_BGR2RGB)
@@ -50,3 +71,5 @@ for county in tornado_stats:
     total_count = total_count + tornado_stats[county]
 print(total_count)
 # stats validated and ready to insert into database
+tornado_df = pd.DataFrame.from_dict(tornado_stats, orient = 'index', columns = ['numTornados'])
+#add_wi_tornado_stats_to_db(tornado_df)
