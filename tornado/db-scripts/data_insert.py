@@ -104,8 +104,8 @@ def test_join():
     gdf = gpd.GeoDataFrame(df, geometry = 'geometry')
     return gdf
 
-
 test_wkt_convert('Wisconsin')
-test_wkt_convert('Iowa')
-test_wkt_convert('Minnesota')
-all_data = get_all_county_info()
+test = test_join()
+#test_wkt_convert('Iowa')
+#test_wkt_convert('Minnesota')
+#all_data = get_all_county_info()
