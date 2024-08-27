@@ -10,7 +10,8 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from dotenv import dotenv_values
 
 # CONSTANTS
-YEARS = ['2010','2011','2012','2013','2014','2015','2016','2017','2018','2019','2020','2021'] # weather.gov site does not have data past 2010 available
+YEARS = ['2010','2011','2012','2013','2014','2015','2016','2017','2018','2019','2020','2021','2022','2023','2024'] # weather.gov site does not have data past 2010 available
+#STATES = ['Minnesota','Iowa','Wisconsin']
 TORNADO_DATA = {}
 
 sqlserver_config = dotenv_values('.env')
@@ -37,9 +38,9 @@ def update(*args):
     canvas = FigureCanvasTkAgg(fig, master = root)
     canvas.get_tk_widget().pack(side = 'top')
     plot_gdf = GDF
-    for select in option_list.curselection():
-        filtered_stats = TORNADO_STATS_DF[TORNADO_STATS_DF.year == int(option_list.get(select))][['countyID','numTornados']]
-        filtered_stats = filtered_stats.rename(columns = {'numTornados' : 'numTornados_{year}'.format(year = option_list.get(select))})
+    for select in year_option_list.curselection():
+        filtered_stats = TORNADO_STATS_DF[TORNADO_STATS_DF.year == int(year_option_list.get(select))][['countyID','numTornados']]
+        filtered_stats = filtered_stats.rename(columns = {'numTornados' : 'numTornados_{year}'.format(year = year_option_list.get(select))})
         plot_gdf = plot_gdf.merge(filtered_stats, on = 'countyID', how = 'left')
     plot_gdf['YEAR_SUM'] = plot_gdf[plot_gdf.columns[plot_gdf.columns.str.startswith('numTornados')]].sum(axis = 1)
     plot_gdf.plot(ax = ax,column = 'YEAR_SUM',cmap = 'OrRd',edgecolor = 'black',legend = True)
@@ -67,19 +68,28 @@ top_5.pack(side = 'bottom')
 # menu objects 
 menu_frame = Tk.Frame(master = root)
 menu_frame.pack(side = 'left')
-year_select_label = Tk.Label(master = menu_frame, text = 'Year Selection').grid(row = 0, column = 0, pady = 2)
-option_list_frame = Tk.Frame(master = menu_frame)
-option_list_frame.grid(row = 1, column = 0, pady = 10)
-option_list = Tk.Listbox(master = option_list_frame, selectmode = 'extended') # extended mode doesn't work properly in Jupyter interactive window
-option_list.grid(row = 0, column = 0)
+# state option list #
+#state_select_label = Tk.Label(master = menu_frame, text = 'State Selection').grid(row = 0, column = 0, pady = 2)
+#state_option_list_frame = Tk.Frame(master = menu_frame)
+#state_option_list_frame.grid(row = 1, column = 0, pady = 10)
+#state_option_list = Tk.Listbox(master = state_option_list_frame, selectmode = 'extended') # extended mode doesn't work properly in Jupyter interactive window
+#state_option_list.grid(row = 0, column = 0)
+#for item in range(len(STATES)):
+#    state_option_list.insert(item, STATES[item])
+# year option list
+year_select_label = Tk.Label(master = menu_frame, text = 'Year Selection').grid(row = 2, column = 0, pady = 2)
+year_option_list_frame = Tk.Frame(master = menu_frame)
+year_option_list_frame.grid(row = 3, column = 0, pady = 10)
+year_option_list = Tk.Listbox(master = year_option_list_frame, selectmode = 'extended') # extended mode doesn't work properly in Jupyter interactive window
+year_option_list.grid(row = 0, column = 0)
 for item in range(len(YEARS)):
-    option_list.insert(item, YEARS[item])
-option_list_scrollbar = Tk.Scrollbar(master = option_list_frame, orient = 'vertical')
+    year_option_list.insert(item, YEARS[item])
+option_list_scrollbar = Tk.Scrollbar(master = year_option_list_frame, orient = 'vertical')
 option_list_scrollbar.grid(row = 0, column = 1, sticky = 'ns')
-option_list_scrollbar.config(command = option_list.yview)
-option_list.config(yscrollcommand = option_list_scrollbar.set)
-update_button = Tk.Button(master = menu_frame, text = 'Update Map', command = update).grid(row = 2, column = 0, pady = 2)
+option_list_scrollbar.config(command = year_option_list.yview)
+year_option_list.config(yscrollcommand = option_list_scrollbar.set)
+update_button = Tk.Button(master = menu_frame, text = 'Update Map', command = update).grid(row = 4, column = 0, pady = 2)
 # default view
-option_list.select_set(0)
+year_option_list.select_set(0)
 update()
 root.mainloop()
