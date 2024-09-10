@@ -10,18 +10,17 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from dotenv import dotenv_values
 
 # CONSTANTS
-YEARS = ['2010','2011','2012','2013','2014','2015','2016','2017','2018','2019','2020','2021','2022','2023','2024'] # weather.gov site does not have data past 2010 available
-#STATES = ['Minnesota','Iowa','Wisconsin']
+YEARS = ['2010','2011','2012','2013','2014','2015','2016','2017','2018','2019','2020','2021'] 
 TORNADO_DATA = {}
 
 sqlserver_config = dotenv_values('.env')
 cnx = mysql.connector.connect(user = sqlserver_config['USERNAME'], password = sqlserver_config['PASSWORD'],
                               host = sqlserver_config['IPADDRESS'], database = sqlserver_config['DATABASE'])
 cursor = cnx.cursor()
-query = ("SELECT county.countyID,county.county,county.state,county.geometry,tornado.year,tornado.numTornados FROM county INNER JOIN tornado ON county.countyID=tornado.countyID")
+query = ("SELECT county.countyID,county.county,county.state,county.geometry,tornado.year,tornado.numTornados FROM county INNER JOIN tornado ON county.countyID=tornado.countyID WHERE county.state = 'Minnesota'")
 cursor.execute(query)
 TORNADO_STATS_DF = pd.DataFrame(cursor, columns = cursor.column_names)
-query = ("SELECT * FROM county")
+query = ("SELECT * FROM county WHERE county.state = 'Minnesota'")
 cursor.execute(query)
 df = pd.DataFrame(cursor, columns = cursor.column_names)
 gs = gpd.GeoSeries.from_wkt(df['geometry'])
@@ -68,14 +67,6 @@ top_5.pack(side = 'bottom')
 # menu objects 
 menu_frame = Tk.Frame(master = root)
 menu_frame.pack(side = 'left')
-# state option list #
-#state_select_label = Tk.Label(master = menu_frame, text = 'State Selection').grid(row = 0, column = 0, pady = 2)
-#state_option_list_frame = Tk.Frame(master = menu_frame)
-#state_option_list_frame.grid(row = 1, column = 0, pady = 10)
-#state_option_list = Tk.Listbox(master = state_option_list_frame, selectmode = 'extended') # extended mode doesn't work properly in Jupyter interactive window
-#state_option_list.grid(row = 0, column = 0)
-#for item in range(len(STATES)):
-#    state_option_list.insert(item, STATES[item])
 # year option list
 year_select_label = Tk.Label(master = menu_frame, text = 'Year Selection').grid(row = 2, column = 0, pady = 2)
 year_option_list_frame = Tk.Frame(master = menu_frame)
