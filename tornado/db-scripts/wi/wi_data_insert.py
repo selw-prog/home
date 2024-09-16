@@ -12,7 +12,7 @@ from PIL import Image
 
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 log_filename = datetime.now().strftime('%Y_%m_%H_%M_wi_data_insert.log')
-log_path = Path(r'C:\Users\seanr\Documents\Logs\Python')
+log_path = Path(r'C:\Users\seanr\OneDrive\Documents\Logs\Python')
 logging.basicConfig(filename='{p}\{f}'.format(p = log_path, f = log_filename), encoding='utf-8', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
 sqlserver_config = dotenv_values('../.env')
@@ -65,7 +65,7 @@ def update_wi_tornado_stats(tornado_df): # for updating stats in db
         cnx.commit()
 
 # main
-image_repo_path = r'C:\Users\seanr\Documents\Home-Lab\code\tornado\db-scripts\wi\new'
+image_repo_path = r'C:\Users\seanr\OneDrive\Documents\Home-Lab\code\tornado\db-scripts\wi\new'
 for file in os.listdir(image_repo_path):
     filename = os.path.join(image_repo_path, file)
     logging.info('Processing file {f}.'.format(f = filename))
