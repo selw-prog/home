@@ -4,6 +4,7 @@ import mysql.connector
 import logging
 import os
 import pandas as pd
+import re
 
 from pathlib import Path
 from datetime import datetime
@@ -20,7 +21,7 @@ cnx = mysql.connector.connect(user = sqlserver_config['USERNAME'], password = sq
                               host = sqlserver_config['IPADDRESS'], database = sqlserver_config['DATABASE'])
 cursor = cnx.cursor()
 
-def add_wi_tornado_stats_to_db(tornado_df):
+def add_wi_tornado_stats_to_db(tornado_df, year):
     add_tornado_stats = ("INSERT INTO tornado "
                   "(countyID, year, numTornados) "
                   "VALUES (%(countyID)s, %(year)s, %(numTornados)s)")
@@ -32,12 +33,13 @@ def add_wi_tornado_stats_to_db(tornado_df):
     for index,row in df.iterrows():
         db_insert_data = {
             'countyID' : row['countyID'],
-            'year' : 2024,
+            'year' : year,
             'numTornados' : row['numTornados']
         }
         logging.info(db_insert_data)
         cursor.execute(add_tornado_stats, db_insert_data)
         cnx.commit()
+    logging.info('All data for year {y} added to database.'.format(y = year))
     return df
 
 def update_wi_tornado_stats(tornado_df): # for updating stats in db
@@ -85,11 +87,6 @@ for file in os.listdir(image_repo_path):
         if num_instances != 0:
             tornado_stats[county] = num_instances
             total_count = total_count + num_instances
-    # print before any corrections are made
-    for county in tornado_stats:
-        logging.info('COUNTY NAME : {c} --> NUM_TORNADOS : {s}'.format(c = county, s = tornado_stats[county]))
-    ## make all adjustments based on .jpg being ingested ##
-    #tornado_stats['Green'] = tornado_stats['Green'] - 1
     total_count = 0
     for county in tornado_stats:
         logging.info('COUNTY NAME : {c} --> NUM_TORNADOS : {s}'.format(c = county, s = tornado_stats[county]))
@@ -98,3 +95,6 @@ for file in os.listdir(image_repo_path):
     # stats validated and ready to insert into database
     tornado_df = pd.DataFrame.from_dict(tornado_stats, orient = 'index', columns = ['numTornados'])
     logging.info('File processing {f} completed.'.format(f = filename))
+    year = re.search("\\d{4}", file).group()
+    logging.info('Adding stats for year {y}.'.format(y = year))
+    add_wi_tornado_stats_to_db(tornado_df, year)
