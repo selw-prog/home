@@ -12,7 +12,7 @@ from lxml import etree
 # tornado (countyID INT, year INT, numTornados INT) - PK (countyID, year) - FK countyID references county(countyID)
 
 YEARS = ['2010','2011','2012','2013','2014','2015','2016','2017','2018','2019','2020','2021'] # weather.gov site does not have data past 2010 available
-sqlserver_config = dotenv_values('.env')
+sqlserver_config = dotenv_values('../.env')
 cnx = mysql.connector.connect(user = sqlserver_config['USERNAME'], password = sqlserver_config['PASSWORD'],
                               host = sqlserver_config['IPADDRESS'], database = sqlserver_config['DATABASE'])
 cursor = cnx.cursor()
@@ -82,30 +82,5 @@ def add_mn_tornado_stats_to_db():
             cnx.commit()
     return df
 
-def get_all_county_info() -> pd.DataFrame:
-    query = ("SELECT * FROM county")
-    cursor.execute(query)
-    df = pd.DataFrame(cursor, columns = cursor.column_names)
-    return df
 
-def test_wkt_convert(state:str) -> pd.DataFrame:
-    query = ("SELECT * FROM county WHERE state = '{s}'".format(s = state))
-    cursor.execute(query)
-    df = pd.DataFrame(cursor, columns = cursor.column_names)
-    df['geometry'] = gpd.GeoSeries.from_wkt(df['geometry'])
-    gdf = gpd.GeoDataFrame(df, geometry = 'geometry')
-    gdf.plot()
-    
-def test_join(): 
-    query = ("SELECT county.countyId,county.county,county.state,county.geometry,tornado.year,tornado.numTornados FROM county INNER JOIN tornado ON county.countyID=tornado.countyID") # returns 87 * 12 = 1044 rows, will not scale well
-    cursor.execute(query)
-    df = pd.DataFrame(cursor, columns = cursor.column_names)
-    df['geometry'] = gpd.GeoSeries.from_wkt(df['geometry'])
-    gdf = gpd.GeoDataFrame(df, geometry = 'geometry')
-    return gdf
 
-test_wkt_convert('Wisconsin')
-test = test_join()
-#test_wkt_convert('Iowa')
-#test_wkt_convert('Minnesota')
-#all_data = get_all_county_info()
