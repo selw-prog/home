@@ -22,7 +22,7 @@ def toBarGraph(data:dict) -> None:
 IP_REGEX = re.compile('(\d{1,3}[.]\d{1,3}[.]\d{1,3}[.]\d{1,3})$')
 DNS_QUERY_EXISTS = re.compile('(query)')
 DNS_QUERY_REGEX = re.compile('(query.+)')
-MONTH_DAY_REGEX = re.compile(r'\w{3}\W{2}\d{1,2}')
+MONTH_DAY_REGEX = re.compile(r'^\w{3} \d{1,2}')
 TIME_REGEX = re.compile(r'\d{2}:\d{2}:\d{2}')
 queries_list = []
 with filedialog.askopenfile(title = 'Select DNS Query Log', filetypes=[('Log Files', '.log'),('Text Files', '.txt')]) as f:
