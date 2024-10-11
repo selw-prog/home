@@ -1,4 +1,5 @@
 *.csv
+*.ods
 **/test.py
 .env
 test/

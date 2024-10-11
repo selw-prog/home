@@ -97,4 +97,8 @@ for file in os.listdir(image_repo_path):
     logging.info('File processing {f} completed.'.format(f = filename))
     year = re.search("\\d{4}", file).group()
     logging.info('Adding stats for year {y}.'.format(y = year))
+
+
+
     add_wi_tornado_stats_to_db(tornado_df, year)
+    #update_wi_tornado_stats(tornado_df)
