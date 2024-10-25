@@ -31,5 +31,9 @@ def create_app(test_config=None):
     @app.route('/minnesota')
     def minnesota():
         return render_template('minnesota.html')
+    
+    @app.route('/indexv2')
+    def indexv2():
+        return render_template('indexv2.html')
 
     return app
