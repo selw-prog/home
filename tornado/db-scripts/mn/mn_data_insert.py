@@ -3,6 +3,8 @@ import requests
 import geopandas as gpd
 import pandas as pd
 import matplotlib.pyplot as plt
+import csv
+from pathlib import Path
 from dotenv import dotenv_values
 from shapely import wkt
 from lxml import etree
@@ -12,7 +14,7 @@ from lxml import etree
 # tornado (countyID INT, year INT, numTornados INT) - PK (countyID, year) - FK countyID references county(countyID)
 
 YEARS = ['2010','2011','2012','2013','2014','2015','2016','2017','2018','2019','2020','2021'] # weather.gov site does not have data past 2010 available
-sqlserver_config = dotenv_values('../.env')
+sqlserver_config = dotenv_values('../../.env')
 cnx = mysql.connector.connect(user = sqlserver_config['USERNAME'], password = sqlserver_config['PASSWORD'],
                               host = sqlserver_config['IPADDRESS'], database = sqlserver_config['DATABASE'])
 cursor = cnx.cursor()
@@ -82,5 +84,47 @@ def add_mn_tornado_stats_to_db():
             cnx.commit()
     return df
 
+def test():
+    add_tornado_stats = ("INSERT INTO Minnesota "
+                  "(id, county_name, county_state, num_tornados_2010, num_tornados_2011, num_tornados_2012, num_tornados_2013, num_tornados_2014, num_tornados_2015, num_tornados_2016, num_tornados_2017, num_tornados_2018, num_tornados_2019, num_tornados_2020, num_tornados_2021) "
+                  "VALUES (default, %(county_name)s, %(county_state)s, %(num_tornados_2010)s, %(num_tornados_2011)s, %(num_tornados_2012)s, %(num_tornados_2013)s, %(num_tornados_2014)s, %(num_tornados_2015)s, %(num_tornados_2016)s, %(num_tornados_2017)s, %(num_tornados_2018)s, %(num_tornados_2019)s, %(num_tornados_2020)s, %(num_tornados_2021)s)")
+    data = []
+    with open('C:\\Users\\seanr\\OneDrive\\Documents\\Home-Lab\\10-31-24_tornado-stats.csv') as csvfile:
+        reader = csv.DictReader(csvfile)
+        county_data = {}
+        county_data['name'] = 'Clay'
+        county_data['state'] = 'Minnesota'
+        for row in reader:
+            if county_data['name'] != row['county']:
+                print(county_data)
+                data.append(county_data)
+                county_data = {}
+                county_data['name'] = row['county']
+                county_data['state'] = row['state']
+                county_data['num_tornados_{y}'.format(y = row['year'])] = row['numTornados']
+            else: 
+                county_data['num_tornados_{y}'.format(y = row['year'])] = row['numTornados']
+    #for county in data:
+    #    db_insert_data = {
+    #        'county_name' : county['name'],
+    #        'county_state' : county['state'],
+    #        'num_tornados_2010' : county['num_tornados_2010'],
+    #        'num_tornados_2011' : county['num_tornados_2011'],
+    #        'num_tornados_2012' : county['num_tornados_2012'],
+    #        'num_tornados_2013' : county['num_tornados_2013'],
+    #        'num_tornados_2014' : county['num_tornados_2014'],
+    #        'num_tornados_2015' : county['num_tornados_2015'],
+    #        'num_tornados_2016' : county['num_tornados_2016'],
+    #        'num_tornados_2017' : county['num_tornados_2017'],
+    #        'num_tornados_2018' : county['num_tornados_2018'],
+    #        'num_tornados_2019' : county['num_tornados_2019'],
+    #        'num_tornados_2020' : county['num_tornados_2020'],
+    #        'num_tornados_2021' : county['num_tornados_2021']
+    #    }
+    #    cursor.execute(add_tornado_stats, db_insert_data)
+    #    print('inserted data {db}'.format(db = db_insert_data))
+    #    cnx.commit()
+    return data
 
-
+d = test()
+#add_mn_tornado_stats_to_new_table()
