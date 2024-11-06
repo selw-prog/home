@@ -68,20 +68,20 @@ def create_app(test_config=None):
             row_as_dict = row._mapping
             stats = {}
             stats = {
-                'county_name' : row_as_dict['minnesota'].county_name,
-                'county_state' : row_as_dict['minnesota'].county_state,
-                'num_tornados_2010' : row_as_dict['minnesota'].num_tornados_2010,
-                'num_tornados_2011' : row_as_dict['minnesota'].num_tornados_2011,
-                'num_tornados_2012' : row_as_dict['minnesota'].num_tornados_2012,
-                'num_tornados_2013' : row_as_dict['minnesota'].num_tornados_2013,
-                'num_tornados_2014' : row_as_dict['minnesota'].num_tornados_2014,
-                'num_tornados_2015' : row_as_dict['minnesota'].num_tornados_2015,
-                'num_tornados_2016' : row_as_dict['minnesota'].num_tornados_2016,
-                'num_tornados_2017' : row_as_dict['minnesota'].num_tornados_2017,
-                'num_tornados_2018' : row_as_dict['minnesota'].num_tornados_2018,
-                'num_tornados_2019' : row_as_dict['minnesota'].num_tornados_2019,
-                'num_tornados_2020' : row_as_dict['minnesota'].num_tornados_2020,
-                'num_tornados_2021' : row_as_dict['minnesota'].num_tornados_2021
+                'County Name' : row_as_dict['minnesota'].county_name,
+                'County State' : row_as_dict['minnesota'].county_state,
+                '2010' : row_as_dict['minnesota'].num_tornados_2010,
+                '2011' : row_as_dict['minnesota'].num_tornados_2011,
+                '2012' : row_as_dict['minnesota'].num_tornados_2012,
+                '2013' : row_as_dict['minnesota'].num_tornados_2013,
+                '2014' : row_as_dict['minnesota'].num_tornados_2014,
+                '2015' : row_as_dict['minnesota'].num_tornados_2015,
+                '2016' : row_as_dict['minnesota'].num_tornados_2016,
+                '2017' : row_as_dict['minnesota'].num_tornados_2017,
+                '2018' : row_as_dict['minnesota'].num_tornados_2018,
+                '2019' : row_as_dict['minnesota'].num_tornados_2019,
+                '2020' : row_as_dict['minnesota'].num_tornados_2020,
+                '2021' : row_as_dict['minnesota'].num_tornados_2021
             }
             data.append(stats)
         return data
