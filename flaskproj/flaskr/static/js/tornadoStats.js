@@ -1,6 +1,7 @@
 function getTornadoStats() {
     const formData = new FormData();
     const chartData = {};
+    let headers = [];
     formData.append('stateSelect', document.getElementById('stateSelect').value);
     fetch('/api/tornadoStats', {
         method: 'POST',
@@ -9,22 +10,26 @@ function getTornadoStats() {
     .then(response => response.json())
     .then(data => {
         const table = document.getElementById('tornadoStatsTable');
+        const regex = new RegExp('\\d+');
+        const countyProperties = ['County Name', 'County State']
+        const years = []
         // table header
         const headerRow = table.querySelector('thead tr')
         if(headerRow) {
             headerRow.innerHTML = '';
             Object.keys(data[0]).forEach((property) => {
-                if(typeof property === 'string') {
-                    const th = document.createElement('th');
-                    th.textContent = property;
-                    headerRow.prepend(th);   
-                }
-                else {
-                    const th = document.createElement('th');
-                    th.textContent = property;
-                    headerRow.appendChild(th);
+                console.log(property + " : " + regex.test(property))
+                if(regex.test(property)) {
+                    years.push(property)
                 }
             })
+            headers = countyProperties.concat(years.sort())
+            headers.forEach(header => {
+                const th = document.createElement('th');
+                th.textContent = header;
+                headerRow.appendChild(th);
+            })
+            console.log(headers)
         }
         // table body
         const tbody = table.querySelector("tbody");
@@ -32,23 +37,18 @@ function getTornadoStats() {
             tbody.innerHTML = '';
             data.forEach(item => {
                 const row = document.createElement('tr');
-                Object.entries(item).forEach(([key, value]) => {
-                    if(typeof value === 'string') {
-                        const cell = document.createElement('td');
-                        cell.textContent = value;
-                        row.prepend(cell);
-                    }
-                    else {
-                        const cell = document.createElement('td');
-                        cell.textContent = value;
-                        row.appendChild(cell);
-                        if(Object.keys(chartData).indexOf(key) > -1) {
-                            chartData[key] += value;
+                headers.forEach(header => {
+                    const cell = document.createElement('td');
+                    cell.textContent = item[header];
+                    console.log(item[header])
+                    row.appendChild(cell);
+                    if(header.indexOf('County') == -1) {
+                        if(Object.keys(chartData).indexOf(header) > -1) {
+                            chartData[header] += item[header];
                         }
                         else {
-                            chartData[key] = value;
+                            chartData[header] = item[header];
                         }
-                        
                     }
                 });
                 tbody.appendChild(row);
