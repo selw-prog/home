@@ -28,3 +28,7 @@
 .sidebar-heading {
   font-size: .75rem;
 }
+
+tr:hover td {
+  background-color: #15acaa;
+}
