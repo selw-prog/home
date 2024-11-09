@@ -102,7 +102,7 @@
     <!-- Custom styles for this template -->
     <link href="../static/css/dashboard.css" rel="stylesheet">
   </head>
-  <body>
+  <body onload="javascript:getTornadoStats()">
     
 <svg xmlns="http://www.w3.org/2000/svg" class="d-none">
   <symbol id="calendar3" viewBox="0 0 16 16">
@@ -166,7 +166,7 @@
           <a class="nav-link" href="/">Home</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link active" aria-current="page" href="tornadodb">MN Tornado Statistics</a>
+          <a class="nav-link active" aria-current="page" href="tornadodb">Tornado Statistics</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="dnsmonitor">DNS Monitor</a>
@@ -194,7 +194,7 @@
             </h5>
             <div id="userInput" class="form-group" onchange="getTornadoStats()">
               <select id="stateSelect" class="form-select" size="4" multiple aria-label="multiple select">
-                <option value="Minnesota">Minnesota</option>
+                <option value="Minnesota" selected>Minnesota</option>
                 <option value="Wisconsin" disabled>Wisconsin</option>
                 <option value="Iowa" disabled>Iowa</option>
               </select>
@@ -228,11 +228,6 @@
         <table id="tornadoStatsTable" class="table table-striped table-sm">
           <thead>
             <tr>
-              <th scope="col">#</th>
-              <th scope="col">Header</th>
-              <th scope="col">Header</th>
-              <th scope="col">Header</th>
-              <th scope="col">Header</th>
             </tr>
           </thead>
           <tbody>
@@ -250,6 +245,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.2/dist/chart.umd.js" integrity="sha384-eI7PSr3L1XLISH8JdDII5YN/njoSsxfbrkCTnJrzXt+ENP5MOVBxD+l6sEG4zoLp" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@^3"></script>
     <script src="../static/js/dashboard.js"></script></body>
     <script src="../static/js/tornadoStats.js"></script>
 </html>
