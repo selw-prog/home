@@ -23,7 +23,6 @@ function getTornadoStats() {
         if(headerRow) {
             headerRow.innerHTML = '';
             Object.keys(data[0]).forEach((property) => {
-                // console.log(property + " : " + regex.test(property))
                 if(regex.test(property)) {
                     years.push(property)
                 }
@@ -34,8 +33,14 @@ function getTornadoStats() {
                 th.textContent = header;
                 headerRow.appendChild(th);
             })
-            // console.log(headers)
         }
+        const headerColumns = table.querySelectorAll('th');
+        headerColumns.forEach((header, index) => { 
+            header.addEventListener('click', () => {
+                header.dataset.sort = header.dataset.sort === 'asc' ? 'desc' : 'asc';
+                sortTableByColumn(table, index, header.dataset.sort === 'asc');
+            });
+        });
         // table body
         const tbody = table.querySelector("tbody");
         if(tbody) {
@@ -45,7 +50,6 @@ function getTornadoStats() {
                 headers.forEach(header => {
                     const cell = document.createElement('td');
                     cell.textContent = item[header];
-                    // console.log(item[header])
                     row.appendChild(cell);
                     if(header.indexOf('County') == -1) {
                         if(Object.keys(chartData).indexOf(header) > -1) {
