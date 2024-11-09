@@ -1,3 +1,8 @@
+function average(ctx) {
+    const values = ctx.chart.data.datasets[0].data;
+    return values.reduce((a, b) => a + b, 0) / values.length;
+  }
+
 function getTornadoStats() {
     const formData = new FormData();
     const chartData = {};
@@ -18,7 +23,7 @@ function getTornadoStats() {
         if(headerRow) {
             headerRow.innerHTML = '';
             Object.keys(data[0]).forEach((property) => {
-                console.log(property + " : " + regex.test(property))
+                // console.log(property + " : " + regex.test(property))
                 if(regex.test(property)) {
                     years.push(property)
                 }
@@ -29,7 +34,7 @@ function getTornadoStats() {
                 th.textContent = header;
                 headerRow.appendChild(th);
             })
-            console.log(headers)
+            // console.log(headers)
         }
         // table body
         const tbody = table.querySelector("tbody");
@@ -40,7 +45,7 @@ function getTornadoStats() {
                 headers.forEach(header => {
                     const cell = document.createElement('td');
                     cell.textContent = item[header];
-                    console.log(item[header])
+                    // console.log(item[header])
                     row.appendChild(cell);
                     if(header.indexOf('County') == -1) {
                         if(Object.keys(chartData).indexOf(header) > -1) {
@@ -67,6 +72,26 @@ function getTornadoStats() {
                 }]
             },
             options: {
+                plugins: {
+                    annotation: {
+                        annotations: {
+                            line: {
+                                type: 'line',
+                                borderColor: 'black',
+                                borderDash: [6, 6],
+                                borderDashOffset: 0,
+                                borderWidth: 3,
+                                label: {
+                                    display: true,
+                                    content: (ctx) => 'Average: ' + average(ctx).toFixed(2),
+                                    position: 'end'
+                                },
+                                scaleID: 'y',
+                                value: (ctx) => average(ctx)
+                            }
+                        }
+                    }
+                },
                 scales : {
                     y : {
                         beginAtZero: true
