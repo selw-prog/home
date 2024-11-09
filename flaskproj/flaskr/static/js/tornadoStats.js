@@ -38,7 +38,7 @@ function getTornadoStats() {
         headerColumns.forEach((header, index) => { 
             header.addEventListener('click', () => {
                 header.dataset.sort = header.dataset.sort === 'asc' ? 'desc' : 'asc';
-                sortTableByColumn(table, index, header.dataset.sort === 'asc');
+                sortTableByColumn(table.id, index, header.dataset.sort === 'asc');
             });
         });
         // table body
