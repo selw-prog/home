@@ -14,11 +14,15 @@ function sortTableByColumn(tableId, columnIndex, ascending = true) {
         }
     });
     // Clear existing arrows
-    table.querySelectorAll('th').forEach(th => th.textContent = th.textContent.replace(/ ↑| ↓/g, ''));
-
+    table.querySelectorAll('th').forEach(th => {
+        th.textContent = th.textContent.replace(/ ↑| ↓/g, '');
+        th.style.backgroundColor = 'transparent';
+    });
+    
     // Add arrow to the clicked column header
     const header = table.querySelectorAll('th')[columnIndex];
     header.textContent += ascending ? ' ↑' : ' ↓';
+    header.style.backgroundColor = '#abfcda' // RESET BACKGROUND COLOR TO WHITE
 
     // Update table body
     const tbody = table.querySelector('tbody');
