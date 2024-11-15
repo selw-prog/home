@@ -1,11 +1,76 @@
-function average(ctx) {
+var defaultChartData = {};
+var allData = {};
+
+function average(ctx) { // get average of chart dataset
     const values = ctx.chart.data.datasets[0].data;
     return values.reduce((a, b) => a + b, 0) / values.length;
-  }
+}
+
+function isFiltered() { // return true if there is a row with the filtered attribute
+    const table = document.getElementById('tornadoStatsTable');
+    const rows = table.rows;
+    for (let i = 0; i < rows.length; i++) {
+        if (rows[i].hasAttribute('data-filtered')) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function toggleClickHandler(event, chart) {
+    const row = event.target.closest('tr');
+    console.log(row);
+    if(isFiltered()) {
+        if(row.hasAttribute('data-filtered')) { // clicked on row that is already filtered - reset to default
+            row.removeAttribute('data-filtered');
+            row.style.removeProperty('background-color');
+            updateChart(defaultChartData, chart);
+        }
+        else { // clicked on different row to filter when chart is already filtered
+            filteredRows = document.querySelectorAll('tr[data-filtered="true"]');
+            filteredRows.forEach((row) => {
+                console.log(row)
+                row.removeAttribute('data-filtered');
+                row.style.removeProperty('background-color');
+            })
+            filterOnTableRow(row, chart)
+        }
+
+    }
+    else { // clicked on row to filter
+        filterOnTableRow(row, chart)
+    }
+}
+
+function filterOnTableRow(tableRow, chart) { // set attribute, change background color, get county data, update chart
+    tableRow.setAttribute('data-filtered', 'true');
+    tableRow.style.backgroundColor = "#abfcda"
+    const category = tableRow.cells[0].textContent;
+    const countyData = allData.find(item => item['County Name'] === category);
+    const filteredCountyData = [];
+    Object.entries(countyData).forEach(([key, value]) => {
+        if(chart.data.labels.includes(key)) {
+            filteredCountyData[key] = value;
+        }
+    });
+    updateChart(filteredCountyData, chart);
+}
+
+function updateChart(d, chart) { // plot chart with new data
+    const newData = {
+        labels: chart.data.labels,
+        datasets: [{
+            label: 'Num Tornados',
+            data: Object.values(d),
+            borderWidth: 1
+        }]
+    };
+    chart.data = newData;
+    chart.update();
+}
 
 function getTornadoStats() {
     const formData = new FormData();
-    const chartData = {};
     let headers = [];
     formData.append('stateSelect', document.getElementById('stateSelect').value);
     fetch('/api/tornadoStats', {
@@ -14,6 +79,7 @@ function getTornadoStats() {
     })
     .then(response => response.json())
     .then(data => {
+        allData = data;
         const table = document.getElementById('tornadoStatsTable');
         const regex = new RegExp('\\d+');
         const countyProperties = ['County Name', 'County State']
@@ -52,11 +118,11 @@ function getTornadoStats() {
                     cell.textContent = item[header];
                     row.appendChild(cell);
                     if(header.indexOf('County') == -1) {
-                        if(Object.keys(chartData).indexOf(header) > -1) {
-                            chartData[header] += item[header];
+                        if(Object.keys(defaultChartData).indexOf(header) > -1) {
+                            defaultChartData[header] += item[header];
                         }
                         else {
-                            chartData[header] = item[header];
+                            defaultChartData[header] = item[header];
                         }
                     }
                 });
@@ -68,10 +134,10 @@ function getTornadoStats() {
         const myChart = new Chart(ctx, {
             type: 'line',
             data : {
-                labels: Object.keys(chartData),
+                labels: Object.keys(defaultChartData),
                 datasets: [{
                     label : 'Num Tornados',
-                    data: Object.values(chartData),
+                    data: Object.values(defaultChartData),
                     borderWidth: 1
                 }]
             },
@@ -103,6 +169,13 @@ function getTornadoStats() {
                 }
             }
         });
+        // add filtering to table rows
+        const rows = table.getElementsByTagName('tr');
+        for(i = 1; i < rows.length; i++) { // start at 1 index to skip header
+            rows[i].addEventListener('click', (event) => {
+                toggleClickHandler(event, myChart)
+            })
+        }
     })
 
     .catch(error => {
