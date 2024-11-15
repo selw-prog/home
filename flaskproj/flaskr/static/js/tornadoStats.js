@@ -81,10 +81,10 @@ function getTornadoStats() {
     .then(data => {
         allData = data;
         const table = document.getElementById('tornadoStatsTable');
-        const regex = new RegExp('\\d+');
+        const regex = new RegExp('\\d+'); // regex for checking if property only contains numbers
+        // table header
         const countyProperties = ['County Name', 'County State']
         const years = []
-        // table header
         const headerRow = table.querySelector('thead tr')
         if(headerRow) {
             headerRow.innerHTML = '';
@@ -101,7 +101,7 @@ function getTornadoStats() {
             })
         }
         const headerColumns = table.querySelectorAll('th');
-        headerColumns.forEach((header, index) => { 
+        headerColumns.forEach((header, index) => { // add sorting listener to each column header
             header.addEventListener('click', () => {
                 header.dataset.sort = header.dataset.sort === 'asc' ? 'desc' : 'asc';
                 sortTableByColumn(table.id, index, header.dataset.sort === 'asc');
