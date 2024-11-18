@@ -19,7 +19,6 @@ function isFiltered() { // return true if there is a row with the filtered attri
 
 function toggleClickHandler(event, chart) {
     const row = event.target.closest('tr');
-    console.log(row);
     if(isFiltered()) {
         if(row.hasAttribute('data-filtered')) { // clicked on row that is already filtered - reset to default
             row.removeAttribute('data-filtered');
@@ -29,7 +28,6 @@ function toggleClickHandler(event, chart) {
         else { // clicked on different row to filter when chart is already filtered
             filteredRows = document.querySelectorAll('tr[data-filtered="true"]');
             filteredRows.forEach((row) => {
-                console.log(row)
                 row.removeAttribute('data-filtered');
                 row.style.removeProperty('background-color');
             })
@@ -93,39 +91,40 @@ function getTornadoStats() {
                     years.push(property)
                 }
             })
-            headers = countyProperties.concat(years.sort())
+            headers = countyProperties.concat(years.sort(), 'Total')
             headers.forEach(header => {
                 const th = document.createElement('th');
                 th.textContent = header;
                 headerRow.appendChild(th);
             })
         }
-        const headerColumns = table.querySelectorAll('th');
-        headerColumns.forEach((header, index) => { // add sorting listener to each column header
-            header.addEventListener('click', () => {
-                header.dataset.sort = header.dataset.sort === 'asc' ? 'desc' : 'asc';
-                sortTableByColumn(table.id, index, header.dataset.sort === 'asc');
-            });
-        });
         // table body
         const tbody = table.querySelector("tbody");
         if(tbody) {
             tbody.innerHTML = '';
             data.forEach(item => {
                 const row = document.createElement('tr');
+                var countyTotal = 0;
                 headers.forEach(header => {
-                    const cell = document.createElement('td');
-                    cell.textContent = item[header];
-                    row.appendChild(cell);
-                    if(header.indexOf('County') == -1) {
-                        if(Object.keys(defaultChartData).indexOf(header) > -1) {
-                            defaultChartData[header] += item[header];
-                        }
-                        else {
-                            defaultChartData[header] = item[header];
+                    if(header != 'Total') { // skip header cell
+                        const cell = document.createElement('td');
+                        cell.textContent = item[header];
+                        row.appendChild(cell);
+                        if(years.indexOf(header) > -1) { // calculate total tornados per county
+                            if(Object.keys(defaultChartData).indexOf(header) > -1) {
+                                defaultChartData[header] += item[header];
+                            }
+                            else {
+                                defaultChartData[header] = item[header];
+                            }
+                            countyTotal += item[header]
                         }
                     }
                 });
+                // add total cell
+                const cell = document.createElement('td');
+                cell.textContent = countyTotal;
+                row.appendChild(cell);
                 tbody.appendChild(row);
             });
         }
@@ -169,7 +168,15 @@ function getTornadoStats() {
                 }
             }
         });
-        // add filtering to table rows
+        // add sort listener to table columns
+        const headerColumns = table.querySelectorAll('th');
+        headerColumns.forEach((header, index) => { // add sorting listener to each column header
+            header.addEventListener('click', () => {
+                header.dataset.sort = header.dataset.sort === 'asc' ? 'desc' : 'asc';
+                sortTableByColumn(table.id, index, header.dataset.sort === 'asc');
+            });
+        });
+        // add filter listener to table rows
         const rows = table.getElementsByTagName('tr');
         for(i = 1; i < rows.length; i++) { // start at 1 index to skip header
             rows[i].addEventListener('click', (event) => {
