@@ -58,7 +58,7 @@ function updateChart(d, chart) { // plot chart with new data
     const newData = {
         labels: chart.data.labels,
         datasets: [{
-            label: 'Num Tornados',
+            label: 'Tornado Count',
             data: Object.values(d),
             borderWidth: 1
         }]
@@ -135,7 +135,7 @@ function getTornadoStats() {
             data : {
                 labels: Object.keys(defaultChartData),
                 datasets: [{
-                    label : 'Num Tornados',
+                    label : 'Tornado Count',
                     data: Object.values(defaultChartData),
                     borderWidth: 1
                 }]
