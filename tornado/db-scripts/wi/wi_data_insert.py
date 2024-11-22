@@ -3,8 +3,10 @@ import pytesseract
 import mysql.connector
 import logging
 import os
+import json
 import pandas as pd
 import re
+import csv
 
 from pathlib import Path
 from datetime import datetime
@@ -16,7 +18,7 @@ log_filename = datetime.now().strftime('%Y_%m_%H_%M_wi_data_insert.log')
 log_path = Path(r'C:\Users\seanr\OneDrive\Documents\Logs\Python')
 logging.basicConfig(filename='{p}\{f}'.format(p = log_path, f = log_filename), encoding='utf-8', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
-sqlserver_config = dotenv_values('../.env')
+sqlserver_config = dotenv_values('../../.env')
 cnx = mysql.connector.connect(user = sqlserver_config['USERNAME'], password = sqlserver_config['PASSWORD'],
                               host = sqlserver_config['IPADDRESS'], database = sqlserver_config['DATABASE'])
 cursor = cnx.cursor()
@@ -66,39 +68,41 @@ def update_wi_tornado_stats(tornado_df): # for updating stats in db
         cursor.execute(update_tornado_stats.format(num = updated_tornado_count, id = row['countyID']))
         cnx.commit()
 
+
+
+
+def insert_json_file(file_path):
+    add_tornado_stats = ("INSERT INTO wisconsin "
+                  "(id, county_name, county_state, num_tornados_2014, num_tornados_2015, num_tornados_2016, num_tornados_2017, num_tornados_2018, num_tornados_2019, num_tornados_2020, num_tornados_2021, num_tornados_2022, num_tornados_2023, num_tornados_2024) "
+                  "VALUES (default, %(county_name)s, %(county_state)s, %(num_tornados_2014)s, %(num_tornados_2015)s, %(num_tornados_2016)s, %(num_tornados_2017)s, %(num_tornados_2018)s, %(num_tornados_2019)s, %(num_tornados_2020)s, %(num_tornados_2021)s, %(num_tornados_2022)s, %(num_tornados_2023)s, %(num_tornados_2024)s)")
+    with open(file_path) as json_file:
+        file_content = json_file.read()
+        data = json.loads(file_content)
+    print(data)
+    for county in data:
+        print(county)
+        db_insert_data = {
+            'county_name' : county,
+            'county_state' : 'Wisconsin',
+            'num_tornados_2014' : data[county]['2014'],
+            'num_tornados_2015' : data[county]['2015'],
+            'num_tornados_2016' : data[county]['2016'],
+            'num_tornados_2017' : data[county]['2017'],
+            'num_tornados_2018' : data[county]['2018'],
+            'num_tornados_2019' : data[county]['2019'],
+            'num_tornados_2020' : data[county]['2020'],
+            'num_tornados_2021' : data[county]['2021'],
+            'num_tornados_2022' : data[county]['2022'],
+            'num_tornados_2023' : data[county]['2023'],
+            'num_tornados_2024' : data[county]['2024']
+        }
+        cursor.execute(add_tornado_stats, db_insert_data)
+        print('inserted data {db}'.format(db = db_insert_data))
+        cnx.commit()
+
+wi_counties = ['Buffalo','Trempealeau','Marinette','Sauk','Eau Claire','Crawford','Door','Juneau','Rusk','Adams','Iron','Ashland','Bayfield','Grant','Clark','Oneida','Fond du Lac','Calumet','Chippewa','Rock','Vernon','Racine','Kenosha','Walworth','Pierce','La Crosse','Kewaunee','Sheboygan','Lafayette','Polk','Douglas','Brown','Dane','Dodge','Green Lake','Sawyer','Portage','Dunn','Winnebago','Shawano','Jefferson','Jackson','Washington','Marathon','Barron','Iowa','Taylor','Menominee','Waushara','Washburn','Manitowoc','Columbia','Milwaukee','Outagamie','Marquette','Richland','Florence','Oconto','Waukesha','Wood','Price','Ozaukee','Waupaca','Pepin','St. Croix','Forest','Burnett','Monroe','Langlade','Green','Vilas','Lincoln']
+years = ['2014','2015','2016','2017','2018','2019','2020','2021','2022','2023','2024']
+
 # main
-image_repo_path = r'C:\Users\seanr\OneDrive\Documents\Home-Lab\code\tornado\db-scripts\wi\new'
-for file in os.listdir(image_repo_path):
-    filename = os.path.join(image_repo_path, file)
-    logging.info('Processing file {f}.'.format(f = filename))
-    img_cv = cv2.imread(filename)
-    logging.info('Using {f} as input.'.format(f = filename))
-    img_rgb = cv2.cvtColor(img_cv, cv2.COLOR_BGR2RGB)
-    detected_info = pytesseract.image_to_string(img_rgb)
-    query = ("SELECT countyID,county,state FROM county WHERE state = 'Wisconsin'")
-    cursor.execute(query)
-    logging.info('Executed {q} against {db}.'.format(q = query, db = sqlserver_config['IPADDRESS']))
-    df_wi_counties = pd.DataFrame(cursor, columns = cursor.column_names)
-    # identify counties and how many instances of a given county exist within detected_info
-    tornado_stats = {}
-    total_count = 0
-    for county in df_wi_counties['county']:
-        num_instances = detected_info.count(county)
-        if num_instances != 0:
-            tornado_stats[county] = num_instances
-            total_count = total_count + num_instances
-    total_count = 0
-    for county in tornado_stats:
-        logging.info('COUNTY NAME : {c} --> NUM_TORNADOS : {s}'.format(c = county, s = tornado_stats[county]))
-        total_count = total_count + tornado_stats[county]
-    logging.info('Total number of tornados found in this file : {c}.'.format(c = total_count))
-    # stats validated and ready to insert into database
-    tornado_df = pd.DataFrame.from_dict(tornado_stats, orient = 'index', columns = ['numTornados'])
-    logging.info('File processing {f} completed.'.format(f = filename))
-    year = re.search("\\d{4}", file).group()
-    logging.info('Adding stats for year {y}.'.format(y = year))
 
-
-
-    add_wi_tornado_stats_to_db(tornado_df, year)
-    #update_wi_tornado_stats(tornado_df)
+insert_json_file('C:\\Users\\seanr\\OneDrive\\Documents\\Home-Lab\\code\\tornado\\db-scripts\\wi\\11-22-24_Complete-WI-Tornado-Stats.json')
