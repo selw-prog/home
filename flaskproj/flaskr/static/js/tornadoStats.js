@@ -23,7 +23,7 @@ function toggleClickHandler(event, chart) {
         if(row.hasAttribute('data-filtered')) { // clicked on row that is already filtered - reset to default
             row.removeAttribute('data-filtered');
             row.style.removeProperty('background-color');
-            updateChart(defaultChartData, chart);
+            filterChart(defaultChartData, chart);
         }
         else { // clicked on different row to filter when chart is already filtered
             filteredRows = document.querySelectorAll('tr[data-filtered="true"]');
@@ -51,10 +51,65 @@ function filterOnTableRow(tableRow, chart) { // set attribute, change background
             filteredCountyData[key] = value;
         }
     });
-    updateChart(filteredCountyData, chart);
+    filterChart(filteredCountyData, chart);
 }
 
-function updateChart(d, chart) { // plot chart with new data
+function createChart() { // init chart
+    const ctx = document.getElementById('tornadoStatsChart').getContext('2d');
+    const myChart = new Chart(ctx, {
+        type: 'line',
+        data : {
+            labels: [],
+            datasets: [{
+                label : 'Tornado Count',
+                data: [],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            plugins: {
+                annotation: {
+                    annotations: {
+                        line: {
+                            type: 'line',
+                            borderColor: 'black',
+                            borderDash: [6, 6],
+                            borderDashOffset: 0,
+                            borderWidth: 3,
+                            label: {
+                                display: true,
+                                content: (ctx) => 'Average: ' + average(ctx).toFixed(2),
+                                position: 'end'
+                            },
+                            scaleID: 'y',
+                            value: (ctx) => average(ctx)
+                        }
+                    }
+                }
+            },
+            scales : {
+                y : {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+function updateChart(d, chart) { // write chart with new dataset
+    const newData = {
+        labels: Object.keys(d),
+        datasets: [{
+            label: 'Tornado Count',
+            data: Object.values(d),
+            borderWidth: 1
+        }]
+    };
+    chart.data = newData;
+    chart.update();
+}
+
+function filterChart(d, chart) { // filter chart with table selection
     const newData = {
         labels: chart.data.labels,
         datasets: [{
@@ -67,11 +122,20 @@ function updateChart(d, chart) { // plot chart with new data
     chart.update();
 }
 
-function getTornadoStats() {
+function getTornadoStats() { // query database for state data, rewrite table, update chart
+    defaultChartData = {}; // reset defaultChartData
     const formData = new FormData();
     let headers = [];
     formData.append('stateSelect', document.getElementById('stateSelect').value);
-    fetch('/api/tornadoStats', {
+    switch(formData.get('stateSelect')) {
+        case 'Minnesota':
+            api = '/api/mnTornadoStats'
+            break;
+        case 'Wisconsin':
+            api = '/api/wiTornadoStats'
+            break;
+    }
+    fetch(api, {
         method: 'POST',
         body: formData
     })
@@ -129,45 +193,9 @@ function getTornadoStats() {
             });
         }
         // chart
-        const ctx = document.getElementById('tornadoStatsChart').getContext('2d');
-        const myChart = new Chart(ctx, {
-            type: 'line',
-            data : {
-                labels: Object.keys(defaultChartData),
-                datasets: [{
-                    label : 'Tornado Count',
-                    data: Object.values(defaultChartData),
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                plugins: {
-                    annotation: {
-                        annotations: {
-                            line: {
-                                type: 'line',
-                                borderColor: 'black',
-                                borderDash: [6, 6],
-                                borderDashOffset: 0,
-                                borderWidth: 3,
-                                label: {
-                                    display: true,
-                                    content: (ctx) => 'Average: ' + average(ctx).toFixed(2),
-                                    position: 'end'
-                                },
-                                scaleID: 'y',
-                                value: (ctx) => average(ctx)
-                            }
-                        }
-                    }
-                },
-                scales : {
-                    y : {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
+        const canvas = document.getElementById('tornadoStatsChart');
+        const myChart = Chart.getChart(canvas);
+        updateChart(defaultChartData, myChart)
         // add sort listener to table columns
         const headerColumns = table.querySelectorAll('th');
         headerColumns.forEach((header, index) => { // add sorting listener to each column header
@@ -189,3 +217,5 @@ function getTornadoStats() {
         console.log('error', error)
     })
 }
+
+createChart()

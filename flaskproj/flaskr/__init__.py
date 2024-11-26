@@ -35,6 +35,22 @@ def create_app(test_config=None):
         num_tornados_2020 = db.Column(db.Integer, nullable = True)
         num_tornados_2021 = db.Column(db.Integer, nullable = True)
 
+    class wisconsin(db.Model):
+        id = db.Column(db.Integer, primary_key = True)
+        county_name = db.Column(db.String(255), nullable = False)
+        county_state = db.Column(db.String(255), nullable = False)
+        num_tornados_2014 = db.Column(db.Integer, nullable = True)
+        num_tornados_2015 = db.Column(db.Integer, nullable = True)
+        num_tornados_2016 = db.Column(db.Integer, nullable = True)
+        num_tornados_2017 = db.Column(db.Integer, nullable = True)
+        num_tornados_2018 = db.Column(db.Integer, nullable = True)
+        num_tornados_2019 = db.Column(db.Integer, nullable = True)
+        num_tornados_2020 = db.Column(db.Integer, nullable = True)
+        num_tornados_2021 = db.Column(db.Integer, nullable = True)
+        num_tornados_2022 = db.Column(db.Integer, nullable = True)
+        num_tornados_2023 = db.Column(db.Integer, nullable = True)
+        num_tornados_2024 = db.Column(db.Integer, nullable = True)
+
     if test_config is None:
         # load the instance config, if it exists, when not testing
         app.config.from_pyfile('config.py', silent=True)
@@ -60,8 +76,8 @@ def create_app(test_config=None):
     def dnsmonitor():
         return render_template('dnsmonitor.html')
 
-    @app.route('/api/tornadoStats', methods = ['POST'])
-    def queryTornadoDB():
+    @app.route('/api/mnTornadoStats', methods = ['POST'])
+    def mnQueryTornadoDB():
         result = db.session.execute(db.select(minnesota).filter_by(county_state = request.form['stateSelect']))
         data = []
         for row in result:
@@ -82,6 +98,31 @@ def create_app(test_config=None):
                 '2019' : row_as_dict['minnesota'].num_tornados_2019,
                 '2020' : row_as_dict['minnesota'].num_tornados_2020,
                 '2021' : row_as_dict['minnesota'].num_tornados_2021
+            }
+            data.append(stats)
+        return data
+
+    @app.route('/api/wiTornadoStats', methods = ['POST'])
+    def wiQueryTornadoDB():
+        result = db.session.execute(db.select(wisconsin).filter_by(county_state = request.form['stateSelect']))
+        data = []
+        for row in result:
+            row_as_dict = row._mapping
+            stats = {}
+            stats = {
+                'County Name' : row_as_dict['wisconsin'].county_name,
+                'County State' : row_as_dict['wisconsin'].county_state,
+                '2014' : row_as_dict['wisconsin'].num_tornados_2014,
+                '2015' : row_as_dict['wisconsin'].num_tornados_2015,
+                '2016' : row_as_dict['wisconsin'].num_tornados_2016,
+                '2017' : row_as_dict['wisconsin'].num_tornados_2017,
+                '2018' : row_as_dict['wisconsin'].num_tornados_2018,
+                '2019' : row_as_dict['wisconsin'].num_tornados_2019,
+                '2020' : row_as_dict['wisconsin'].num_tornados_2020,
+                '2021' : row_as_dict['wisconsin'].num_tornados_2021,
+                '2022' : row_as_dict['wisconsin'].num_tornados_2022,
+                '2023' : row_as_dict['wisconsin'].num_tornados_2023,
+                '2024' : row_as_dict['wisconsin'].num_tornados_2024
             }
             data.append(stats)
         return data
