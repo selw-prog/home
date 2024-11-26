@@ -2,7 +2,8 @@
 *.ods
 **/test.py
 .env
-test/
-sample/
 *.jpg
 *.pyc
+__pycache__
+test/
+sample/
