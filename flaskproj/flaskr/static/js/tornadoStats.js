@@ -79,7 +79,6 @@ function createChart() { // init chart
                             label: {
                                 display: true,
                                 content: (ctx) => 'Average: ' + average(ctx).toFixed(2),
-                                position: 'end'
                             },
                             scaleID: 'y',
                             value: (ctx) => average(ctx)
