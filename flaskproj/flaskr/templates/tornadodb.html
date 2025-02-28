@@ -91,11 +91,6 @@
       .bd-mode-toggle .dropdown-menu .active .bi {
         display: block !important;
       }
-      
-      select {
-        border: none;
-        outline: none;
-      }
 
       h6 {
         text-decoration: underline;
@@ -189,7 +184,7 @@
           <div class="offcanvas-body d-md-flex flex-column p-0 pt-lg-3 overflow-y-auto">
             <ul class="nav flex-column">
               <h6 class="d-flex justify-content-between align-items-center px-1 mt-4 mb-1 text-body-secondary text-uppercase">State</h6>
-                <select id="stateSelect" class="form-select form-select-lg mb-3" size="4" aria-label="select" onchange="getTornadoStats()">
+                <select id="stateSelect" class="form-select form-select-sm" aria-label="select" onchange="getTornadoStats()">
                   <option value="Minnesota" selected>Minnesota</option>
                   <option value="Wisconsin">Wisconsin</option>
                   <option value="Iowa" disabled>Iowa</option>
