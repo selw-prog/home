@@ -18,6 +18,15 @@ log_file = 'C:\\Users\\seanr\\OneDrive\\Documents\\Logs\\Python\\{time}_{file_na
 logging.basicConfig(level=logging.INFO, filename = log_file, format = log_format)
 time=time.strftime("%Y%m%d-%H%M%S") # Get the current time to reference in file names
 
+dtype_mapping = {
+    'id': sqlalchemy.Integer,
+    'event_date': sqlalchemy.Date,
+    'state': sqlalchemy.String(100),
+    'county': sqlalchemy.String(100),
+    'scale': sqlalchemy.String(3),
+    'location': sqlalchemy.String(100)
+}
+
 def output(string:str):
     print(string)
     logging.info(string)
@@ -30,7 +39,7 @@ engine = sqlalchemy.create_engine('mysql+mysqlconnector://{username}:{password}@
 csv_df = pd.read_csv(csv_file)
 with engine.connect() as conn:
     output('Connected to database. Inserting data..')
-    csv_df.to_sql('tornado', conn, if_exists='replace', index=False)
+    csv_df.to_sql('tornado', conn, if_exists='append', index=False, dtype = dtype_mapping)
     output('Insertion complete. Getting data now..')
     result = conn.execute(sqlalchemy.text("SELECT * FROM tornado"))
     output(result.all())
