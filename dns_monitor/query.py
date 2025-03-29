@@ -2,16 +2,20 @@ from doctest import script_from_examples
 import socket
 import time
 import os
+from tracemalloc import start
 from dns import resolver
 
-def get_dns_query(provider:str, query:str):
+def resolve_name(provider:str, query:str) -> dict:
+    timestamps = {}
     resolve = resolver.Resolver()
     resolve.nameservers = [provider]
     start_time = time.time()
+    timestamps['start_time'] = start_time
     try:
         resolve.resolve(query)
         end_time = time.time()
-        return end_time - start_time
+        timestamps['elapsed_time'] = (end_time - start_time)
+        return timestamps
     except resolver.NXDOMAIN :
         print ('Domain name does not exist.')
         return None
@@ -23,15 +27,19 @@ def get_dns_query(provider:str, query:str):
 script_directory = os.path.join(os.path.dirname(__file__), 'query.py')
 
 dns_providers = []
-with open('dns_servers.txt', 'r') as file:
+with open('C:\\Users\\seanr\\OneDrive\\Documents\\Home-Lab\\code\\dns_monitor\\dns_servers.txt', 'r') as file:
     for line in file:
         dns_providers.append(line.strip())
 
 query = 'google.com'
 for provider in dns_providers:
-    response_time = get_dns_query(provider, query)
-    if response_time:
-        print(f"{provider} : {response_time*1000}")
+    insert_data = resolve_name(provider, query)
+    if insert_data:
+        #print(f"{provider} : Success")
+        insert_data['provider_ip'] = provider
+        insert_data['status'] = 'Success'
     else:
-        print(f"{provider} : Failed")
-
+        #print(f"{provider} : Failed")
+        insert_data['provider_ip'] = provider
+        insert_data['status'] = 'Failure'
+    print(insert_data)
