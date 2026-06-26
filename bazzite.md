@@ -22,16 +22,12 @@ Flatpacks and Distrobox both make the $HOME folder available from the host to th
 flatpak install com.google.Chrome
 flatpak install org.kde.gcompris
 flatpak install org.keepassxc.KeePassXC
-flatpak install com.spotify.Client
 flatpak install com.discordapp.Discord
 flatpak install org.libreoffice.LibreOffice
 flatpak install com.atlauncher.ATLauncher
 flatpak install com.mikrotik.WinBox
 flatpak install com.surfshark.Surfshark
 flatpak install com.stremio.Stremio
-flatpak install com.unity.UnityHub
-flatpak install org.blender.Blender
-flatpak install --user https://flathub.org/repo/appstream/org.gimp.GIMP.flatpakref
 ```
 
 ### Homebrew
@@ -95,34 +91,3 @@ quit
 
 * Alternatively, you can go to your Steam library and download it - ensure you have Tools displayed and it should appear as an option. 
     * This download will also take place if you have a game's properties configured to use Proton - Experimental. 
-
-### Game Development
-
-* Currently I am exploring Unity. I'm still trying to get this functional in a Ubuntu distrobox container.
-
-### Azure Development
-
-* I am using a Debian distrobox instance. Below are commands to install PowerShell and the Azure module.
-
-```bash
-sudo apt install powershell
-sudo apt-get install -y wget
-source /etc/os-release
-wget -q https://packages.microsoft.com/config/debian/$VERSION_ID/packages-microsoft-prod.deb
-sudo dpkg -i packages-microsoft-prod.deb
-rm packages-microsoft-prod.deb
-sudo apt-get update
-sudo apt-get install -y powershell
-```
-
-```pwsh
-Install-Module -Name Az -Repository PSGallery 
-Update-Module -Name Az -Force
-Connect-AzAccount
-```
-
-* I also installed the [Azure CLI utility](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-linux?view=azure-cli-latest&pivots=apt).
-
-```bash
-curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-```
